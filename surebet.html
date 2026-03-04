@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Surebet Bulucu</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0a0d12;color:#d0d6e0;font-family:system-ui,sans-serif;font-size:15px;padding:12px;min-height:100vh}
+
+h1{text-align:center;font-size:22px;font-weight:800;color:#00e676;margin:10px 0 4px}
+.sub{text-align:center;color:#4a5568;font-size:12px;margin-bottom:18px}
+
+.box{background:#111620;border:1px solid #1e2a38;border-radius:10px;padding:14px;margin-bottom:12px}
+.box-title{font-size:10px;letter-spacing:2px;color:#4a5568;text-transform:uppercase;margin-bottom:10px}
+
+/* API */
+.api-wrap{display:flex;gap:8px}
+input.api{flex:1;background:#0a0d12;border:1px solid #1e2a38;color:#fff;padding:10px 12px;border-radius:8px;font-size:14px;outline:none}
+input.api:focus{border-color:#00e676}
+button.show-btn{background:#111620;border:1px solid #1e2a38;color:#4a5568;padding:10px 12px;border-radius:8px;font-size:12px;cursor:pointer;white-space:nowrap}
+.hint{font-size:11px;color:#2d3a4a;margin-top:6px}
+.hint a{color:#00e676}
+
+/* SITE ROWS */
+.site-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.site-num{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+input.site-name{flex:1;background:#0a0d12;border:1px solid #1e2a38;color:#fff;padding:8px 10px;border-radius:7px;font-size:13px;outline:none}
+input.site-name:focus{border-color:#00e676}
+.site-count{font-size:11px;font-weight:700;min-width:60px;text-align:right}
+
+/* FILE LABELS — bu kritik, label+input garantili çalışır */
+.file-label{display:block;background:#0d1520;border:2px dashed #1e3a28;border-radius:8px;
+  padding:14px;text-align:center;cursor:pointer;margin-top:8px;transition:border-color .2s}
+.file-label:active{border-color:#00e676;background:#0a1a10}
+.file-label input[type=file]{display:none}
+.file-label-text{color:#00e676;font-size:13px;font-weight:600}
+.file-label-sub{color:#2d3a4a;font-size:11px;margin-top:3px}
+
+.thumb-row{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.thumb{width:56px;height:56px;border-radius:6px;object-fit:cover;border:1px solid #1e2a38}
+.thumb-more{width:56px;height:56px;border-radius:6px;background:#1a2030;border:1px solid #1e2a38;
+  display:flex;align-items:center;justify-content:center;color:#4a5568;font-size:11px;text-align:center}
+.clear-btn{font-size:11px;color:#ef5350;background:none;border:none;cursor:pointer;margin-top:6px;padding:0}
+
+/* STAKE */
+input.stake{background:#0a0d12;border:1px solid #00e676;color:#00e676;padding:10px 12px;
+  border-radius:8px;font-size:20px;font-weight:700;width:130px;outline:none}
+
+/* ANALYZE */
+button.go{display:block;width:100%;padding:15px;background:#00e676;color:#000;font-size:15px;
+  font-weight:800;border:none;border-radius:10px;cursor:pointer;margin-bottom:12px;letter-spacing:1px}
+button.go:disabled{background:#1e2a38;color:#4a5568;cursor:not-allowed}
+
+/* PROGRESS */
+.prog{display:none;background:#111620;border:1px solid #1e2a38;border-radius:10px;padding:14px;margin-bottom:12px}
+.prog.show{display:block}
+.prog-title{font-size:13px;font-weight:600;margin-bottom:8px;word-break:break-all}
+.prog-track{background:#0a0d12;border-radius:20px;height:6px;overflow:hidden;margin-bottom:6px}
+.prog-fill{height:100%;background:linear-gradient(90deg,#00e676,#29b6f6);border-radius:20px;width:0;transition:width .3s}
+.prog-txt{font-size:11px;color:#4a5568}
+.log{margin-top:8px;max-height:80px;overflow-y:auto}
+.log p{font-size:11px;padding:1px 0;color:#4a5568}
+.log p.ok{color:#00e676}
+.log p.er{color:#ef5350}
+
+/* ERROR */
+.err{display:none;padding:10px 14px;background:#1a0a0a;border:1px solid #ef535040;
+  border-radius:8px;color:#ef5350;font-size:12px;margin-bottom:12px}
+.err.show{display:block}
+
+/* RESULTS */
+.tabs{display:flex;gap:4px;margin-bottom:12px}
+.tab-btn{flex:1;padding:10px 6px;background:#111620;border:1px solid #1e2a38;border-radius:8px;
+  color:#4a5568;font-size:11px;font-weight:700;cursor:pointer;letter-spacing:1px}
+.tab-btn.on{background:#00e67615;border-color:#00e676;color:#00e676}
+
+.stat-row{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px}
+.stat{background:#111620;border:1px solid #1e2a38;border-radius:8px;padding:12px;text-align:center}
+.stat-v{font-size:20px;font-weight:800;margin-bottom:2px}
+.stat-l{font-size:9px;letter-spacing:2px;color:#4a5568;text-transform:uppercase}
+
+.sb{background:#0d1a10;border:1px solid #00e67630;border-radius:10px;margin-bottom:10px;overflow:hidden}
+.sb-head{padding:12px 14px;display:flex;align-items:center;gap:10px;cursor:pointer}
+.sb-num{width:26px;height:26px;background:#00e67615;border:1px solid #00e67630;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#00e676;flex-shrink:0}
+.sb-info{flex:1;min-width:0}
+.sb-match{font-size:13px;font-weight:700;color:#fff;word-break:break-word}
+.sb-meta{font-size:11px;color:#4a5568;margin-top:2px}
+.sb-pct{background:#00e67615;border:1px solid #00e67630;border-radius:6px;padding:5px 10px;text-align:center;flex-shrink:0}
+.sb-pct-n{font-size:18px;font-weight:900;color:#00e676;line-height:1}
+.sb-pct-l{font-size:9px;color:#4a5568}
+
+.sb-body{display:none;padding:0 14px 14px;border-top:1px solid #00e67620}
+.sb-body.open{display:block}
+
+table.bt{width:100%;border-collapse:collapse;margin-top:10px;margin-bottom:10px;font-size:12px}
+table.bt th{text-align:left;font-size:9px;letter-spacing:1px;color:#4a5568;
+  padding:5px 8px;border-bottom:1px solid #1e2a38;text-transform:uppercase}
+table.bt td{padding:8px 8px;border-bottom:1px solid #1e2a38;vertical-align:middle}
+table.bt tr:last-child td{border-bottom:none}
+.t-site{background:#29b6f615;border:1px solid #29b6f630;color:#29b6f6;
+  padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap}
+.t-out{background:#ffd54f15;border:1px solid #ffd54f30;color:#ffd54f;
+  padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700}
+.t-odd{font-size:15px;font-weight:700;color:#fff}
+.t-stake{font-size:13px;font-weight:700;color:#00e676}
+.t-ret{font-size:11px;color:#8b949e}
+
+.guarantee{background:#0a1a10;border:1px solid #00e67640;border-radius:8px;
+  padding:12px 14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}
+.g-lbl{font-size:12px;color:#8b949e}
+.g-sub{font-size:10px;color:#4a5568;margin-top:2px}
+.g-amt{font-size:22px;font-weight:900;color:#00e676}
+
+.match-block{background:#111620;border:1px solid #1e2a38;border-radius:8px;margin-bottom:8px;overflow:hidden}
+.match-hd{padding:10px 12px;border-bottom:1px solid #1e2a38;display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.match-n{font-size:13px;font-weight:700;color:#fff;word-break:break-word}
+.match-s{font-size:10px;color:#4a5568;margin-top:2px}
+.match-cnt{background:#29b6f615;border:1px solid #29b6f630;color:#29b6f6;
+  padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;flex-shrink:0}
+.chips{padding:8px 10px;display:flex;flex-wrap:wrap;gap:5px}
+.chip{background:#0a0d12;border:1px solid #1e2a38;border-radius:5px;padding:6px 8px;min-width:80px}
+.chip-s{font-size:9px;color:#4a5568;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chip-r{display:flex;justify-content:space-between;align-items:center;gap:4px}
+.chip-o{font-size:9px;color:#29b6f6;background:#29b6f610;padding:1px 4px;border-radius:3px;white-space:nowrap}
+.chip-v{font-size:12px;font-weight:700;color:#fff}
+
+.empty{text-align:center;padding:40px 16px;border:1px solid #1e2a38;border-radius:10px}
+.empty-i{font-size:32px;opacity:.3;margin-bottom:8px}
+.empty-t{color:#4a5568;font-size:12px;letter-spacing:1px}
+</style>
+</head>
+<body>
+
+<h1>⚡ SUREBET BULUCU</h1>
+<div class="sub">GROK-2 VISION · 8 SİTE · TELEFON UYUMLU</div>
+
+<!-- API KEY -->
+<div class="box">
+  <div class="box-title">🔑 Grok API Key</div>
+  <div class="api-wrap">
+    <input class="api" type="password" id="apiKey" placeholder="xai-...">
+    <button class="show-btn" onclick="
+      var i=document.getElementById('apiKey');
+      i.type=i.type=='password'?'text':'password';
+      this.textContent=i.type=='password'?'GÖSTER':'GİZLE'
+    ">GÖSTER</button>
+  </div>
+  <div class="hint">Ücretsiz: <a href="https://console.x.ai" target="_blank">console.x.ai</a> → API Keys</div>
+</div>
+
+<!-- SİTELER + YÜKLEME -->
+<div class="box">
+  <div class="box-title">📸 Site İsimleri &amp; Görsel Yükleme</div>
+
+  <!-- Site 0 -->
+  <div class="site-row">
+    <div class="site-num" style="background:#00e67620;border:1px solid #00e67640;color:#00e676">1</div>
+    <input class="site-name" type="text" id="n0" value="Bet365">
+    <span class="site-count" id="c0" style="color:#4a5568">0 görsel</span>
+  </div>
+  <label class="file-label">
+    <input type="file" multiple accept="image/*" onchange="addFiles(0,this)">
+    <div class="file-label-text">📂 Bet365 görselleri seç</div>
+    <div class="file-label-sub">Birden fazla seçebilirsiniz</div>
+  </label>
+  <div class="thumb-row" id="t0"></div>
+  <button class="clear-btn" onclick="clearSite(0)" id="cl0" style="display:none">🗑 Temizle</button>
+
+  <hr style="border:none;border-top:1px solid #1e2a38;margin:14px 0">
+
+  <!-- Site 1 -->
+  <div class="site-row">
+    <div class="site-num" style="background:#29b6f620;border:1px solid #29b6f640;color:#29b6f6">2</div>
+    <input class="site-name" type="text" id="n1" value="Bwin">
+    <span class="site-count" id="c1" style="color:#4a5568">0 görsel</span>
+  </div>
+  <label class="file-label">
+    <input type="file" multiple accept="image/*" onchange="addFiles(1,this)">
+    <div class="file-label-text">📂 Bwin görselleri seç</div>
+    <div class="file-label-sub">Birden fazla seçebilirsiniz</div>
+  </label>
+  <div class="thumb-row" id="t1"></div>
+  <button class="clear-btn" onclick="clearSite(1)" id="cl1" style="display:none">🗑 Temizle</button>
+
+  <hr style="border:none;border-top:1px solid #1e2a38;margin:14px 0">
+
+  <!-- Site 2 -->
+  <div class="site-row">
+    <div class="site-num" style="background:#ff704320;border:1px solid #ff704340;color:#ff7043">3</div>
+    <input class="site-name" type="text" id="n2" value="1xBet">
+    <span class="site-count" id="c2" style="color:#4a5568">0 görsel</span>
+  </div>
+  <label class="file-label">
+    <input type="file" multiple accept="image/*" onchange="addFiles(2,this)">
+    <div class="file-label-text">📂 1xBet görselleri seç</div>
+    <div class="file-label-sub">Birden fazla seçebilirsiniz</div>
+  </label>
+  <div class="thumb-row" id="t2"></div>
+  <button class="clear-btn" onclick="clearSite(2)" id="cl2" style="display:none">🗑 Temizle</button>
+
+  <hr style="border:none;border-top:1px solid #1e2a38;margin:14px 0">
+
+  <!-- Site 3 -->
+  <div class="site-row">
+    <div class="site-num" style="background:#ab47bc20;border:1px solid #ab47bc40;color:#ab47bc">4</div>
+    <input class="site-name" type="text" id="n3" value="Betway">
+    <span class="site-count" id="c3" style="color:#4a5568">0 görsel</span>
+  </div>
+  <label class="file-label">
+    <input type="file" multiple accept="image/*" onchange="addFiles(3,this)">
+    <div class="file-label-text">📂 Betway görselleri seç</div>
+    <div class="file-label-sub">Birden fazla seçebilirsiniz</div>
+  </label>
+  <div class="thumb-row" id="t3"></div>
+  <button class="clear-btn" onclick="clearSite(3)" id="cl3" style="display:none">🗑 Temizle</button>
+
+  <hr style="border:none;border-top:1px solid #1e2a38;margin:14px 0">
+
+  <!-- Site 4 -->
+  <div class="site-row">
+    <div class="site-num" style="background:#ffca2820;border:1px solid #ffca2840;color:#ffca28">5</div>
+    <input class="site-name" type="text" id="n4" value="Unibet">
+    <span class="site-count" id="c4" style="color:#4a5568">0 görsel</span>
+  </div>
+  <label class="file-label">
+    <input type="file" multiple accept="image/*" onchange="addFiles(4,this)">
+    <div class="file-label-text">📂 Unibet görselleri seç</div>
+    <div class="file-label-sub">Birden fazla seçebilirsiniz</div>
+  </label>
+  <div class="thumb-row" id="t4"></div>
+  <button class="clear-btn" onclick="clearSite(4)" id="cl4" style="display:none">🗑 Temizle</button>
+
+  <hr style="border:none;border-top:1px solid #1e2a38;margin:14px 0">
+
+  <!-- Site 5 -->
+  <div class="site-row">
+    <div class="site-num" style="background:#26c6da20;border:1px solid #26c6da40;color:#26c6da">6</div>
+    <input class="site-name" type="text" id="n5" value="Pinnacle">
+    <span class="site-count" id="c5" style="color:#4a5568">0 görsel</span>
+  </div>
+  <label class="file-label">
+    <input type="file" multiple accept="image/*" onchange="addFiles(5,this)">
+    <div class="file-label-text">📂 Pinnacle görselleri seç</div>
+    <div class="file-label-sub">Birden fazla seçebilirsiniz</div>
+  </label>
+  <div class="thumb-row" id="t5"></div>
+  <button class="clear-btn" onclick="clearSite(5)" id="cl5" style="display:none">🗑 Temizle</button>
+
+  <hr style="border:none;border-top:1px solid #1e2a38;margin:14px 0">
+
+  <!-- Site 6 -->
+  <div class="site-row">
+    <div class="site-num" style="background:#66bb6a20;border:1px solid #66bb6a40;color:#66bb6a">7</div>
+    <input class="site-name" type="text" id="n6" value="William Hill">
+    <span class="site-count" id="c6" style="color:#4a5568">0 görsel</span>
+  </div>
+  <label class="file-label">
+    <input type="file" multiple accept="image/*" onchange="addFiles(6,this)">
+    <div class="file-label-text">📂 William Hill görselleri seç</div>
+    <div class="file-label-sub">Birden fazla seçebilirsiniz</div>
+  </label>
+  <div class="thumb-row" id="t6"></div>
+  <button class="clear-btn" onclick="clearSite(6)" id="cl6" style="display:none">🗑 Temizle</button>
+
+  <hr style="border:none;border-top:1px solid #1e2a38;margin:14px 0">
+
+  <!-- Site 7 -->
+  <div class="site-row">
+    <div class="site-num" style="background:#ef535020;border:1px solid #ef535040;color:#ef5350">8</div>
+    <input class="site-name" type="text" id="n7" value="Betfair">
+    <span class="site-count" id="c7" style="color:#4a5568">0 görsel</span>
+  </div>
+  <label class="file-label">
+    <input type="file" multiple accept="image/*" onchange="addFiles(7,this)">
+    <div class="file-label-text">📂 Betfair görselleri seç</div>
+    <div class="file-label-sub">Birden fazla seçebilirsiniz</div>
+  </label>
+  <div class="thumb-row" id="t7"></div>
+  <button class="clear-btn" onclick="clearSite(7)" id="cl7" style="display:none">🗑 Temizle</button>
+
+</div>
+
+<!-- BAHİS -->
+<div class="box">
+  <div class="box-title">💰 Toplam Bahis Miktarı (₺)</div>
+  <input class="stake" type="number" id="stake" value="1000" min="1">
+</div>
+
+<!-- BUTON -->
+<button class="go" id="goBtn" onclick="startAnalysis()" disabled>API KEY VE GÖRSEL GEREKLİ</button>
+<div class="err" id="errBox"></div>
+
+<!-- PROGRESS -->
+<div class="prog" id="progBox">
+  <div class="prog-title" id="progTitle">Analiz ediliyor...</div>
+  <div class="prog-track"><div class="prog-fill" id="progFill"></div></div>
+  <div class="prog-txt" id="progTxt">0 / 0</div>
+  <div class="log" id="logBox"></div>
+</div>
+
+<!-- SONUÇLAR -->
+<div id="resultArea" style="display:none">
+  <div class="tabs">
+    <button class="tab-btn on" id="tab1" onclick="showTab(1)">📊 SONUÇLAR</button>
+    <button class="tab-btn" id="tab2" onclick="showTab(2)">📋 TÜM ORANLAR</button>
+  </div>
+  <div id="panel1"></div>
+  <div id="panel2" style="display:none"></div>
+</div>
+
+<script>
+var imgs = [[],[],[],[],[],[],[],[]];
+var matches = [];
+var surebets = [];
+var LABELS = {'1':'Ev Sahibi','X':'Beraberlik','2':'Deplasman','1X':'1X','X2':'X2','12':'12'};
+
+// Dosya ekle
+function addFiles(idx, inp) {
+  var files = Array.from(inp.files);
+  if (!files.length) return;
+  var space = 50 - imgs[idx].length;
+  var toAdd = files.filter(function(f){ return f.type.startsWith('image/'); }).slice(0, space);
+  var done = 0;
+  toAdd.forEach(function(f) {
+    var r = new FileReader();
+    r.onload = function(e) {
+      imgs[idx].push({ b64: e.target.result.split(',')[1], prev: e.target.result, mt: f.type||'image/png', name: f.name });
+      done++;
+      if (done === toAdd.length) { renderThumbs(idx); updateAll(); }
+    };
+    r.readAsDataURL(f);
+  });
+}
+
+function renderThumbs(idx) {
+  var el = document.getElementById('t' + idx);
+  var list = imgs[idx];
+  var html = '';
+  var show = Math.min(list.length, 10);
+  for (var i = 0; i < show; i++) {
+    html += '<img class="thumb" src="' + list[i].prev + '" title="' + list[i].name + '">';
+  }
+  if (list.length > 10) html += '<div class="thumb-more">+' + (list.length-10) + '</div>';
+  el.innerHTML = html;
+  document.getElementById('cl' + idx).style.display = list.length ? 'block' : 'none';
+  document.getElementById('c' + idx).textContent = list.length ? list.length + ' görsel' : '0 görsel';
+  document.getElementById('c' + idx).style.color = list.length ? '#00e676' : '#4a5568';
+}
+
+function clearSite(idx) {
+  imgs[idx] = [];
+  renderThumbs(idx);
+  updateAll();
+}
+
+function updateAll() {
+  var total = imgs.reduce(function(a,b){ return a+b.length; }, 0);
+  var key = document.getElementById('apiKey').value.trim();
+  var btn = document.getElementById('goBtn');
+  if (!key) { btn.textContent='API KEY GEREKLİ'; btn.disabled=true; }
+  else if (!total) { btn.textContent='GÖRSEL YÜKLEYİN'; btn.disabled=true; }
+  else { btn.textContent='◆ ' + total + ' GÖRSELİ ANALİZ ET'; btn.disabled=false; }
+}
+
+document.getElementById('apiKey').addEventListener('input', updateAll);
+
+// ── MATH ──
+function findArbitrage(list) {
+  var res = [];
+  for (var mi = 0; mi < list.length; mi++) {
+    var m = list[mi];
+    var om = {};
+    for (var oi = 0; oi < m.odds.length; oi++) {
+      var e = m.odds[oi];
+      var v = parseFloat(e.odd);
+      if (!v || v <= 1.01) continue;
+      if (!om[e.outcome]) om[e.outcome] = [];
+      var found = false;
+      for (var xi = 0; xi < om[e.outcome].length; xi++) {
+        if (om[e.outcome][xi].site === e.site) { if (v > om[e.outcome][xi].odd) om[e.outcome][xi].odd = v; found=true; break; }
+      }
+      if (!found) om[e.outcome].push({ site:e.site, outcome:e.outcome, odd:v });
+    }
+    var outs = Object.keys(om);
+    // 1X2
+    if (outs.indexOf('1')>=0 && outs.indexOf('X')>=0 && outs.indexOf('2')>=0) {
+      var best = null;
+      for (var a=0;a<om['1'].length;a++) for (var b=0;b<om['X'].length;b++) for (var c=0;c<om['2'].length;c++) {
+        var s = 1/om['1'][a].odd + 1/om['X'][b].odd + 1/om['2'][c].odd;
+        if (s < 1) { var p=(1/s-1)*100; if (!best||p>best.profit) best={type:'1X2',group:[om['1'][a],om['X'][b],om['2'][c]],profit:p}; }
+      }
+      if (best) res.push({ match:m.name, league:m.league||'', date:m.date||'', type:best.type, group:best.group, profit:best.profit });
+    }
+    // Çifte şans
+    var pairs=[['1X','2'],['1','X2'],['12','X']];
+    for (var pi=0;pi<pairs.length;pi++) {
+      var pa=pairs[pi][0], pb=pairs[pi][1];
+      if (outs.indexOf(pa)>=0 && outs.indexOf(pb)>=0) {
+        for (var ai=0;ai<om[pa].length;ai++) for (var bi=0;bi<om[pb].length;bi++) {
+          var s2=1/om[pa][ai].odd+1/om[pb][bi].odd;
+          if (s2<1) res.push({match:m.name,league:m.league||'',date:m.date||'',type:pa+'/'+pb,group:[om[pa][ai],om[pb][bi]],profit:(1/s2-1)*100});
+        }
+      }
+    }
+  }
+  res.sort(function(a,b){return b.profit-a.profit;});
+  return res;
+}
+
+function calcStakes(group, total) {
+  var sum = group.reduce(function(a,o){return a+1/o.odd;},0);
+  return group.map(function(o){
+    return { site:o.site, outcome:o.outcome, odd:o.odd,
+      stake:((1/o.odd/sum)*total).toFixed(2),
+      ret:((1/o.odd/sum)*total*o.odd).toFixed(2) };
+  });
+}
+
+function mergeMatches(list) {
+  var map = {};
+  for (var i=0;i<list.length;i++) {
+    var m=list[i];
+    var key=m.name.toLowerCase().replace(/\s*(vs\.?|versus|-)\s*/gi,' - ').replace(/\s+/g,' ').trim();
+    if (!map[key]) map[key]={name:m.name,league:m.league||'',date:m.date||'',odds:[]};
+    for (var j=0;j<m.odds.length;j++) map[key].odds.push(m.odds[j]);
+  }
+  return Object.values(map);
+}
+
+// ── API ──
+function callGrok(apiKey, img, siteName) {
+  var prompt = 'Bu görsel "' + siteName + '" bahis sitesinden alınmıştır.\n' +
+    'Görseldeki TÜM maç isimlerini ve oranları eksiksiz çıkar.\n' +
+    'Oranları tam oku (yuvarlatma yapma). 1.00\'dan küçük oranları atla.\n' +
+    'Her oran için site değeri: "' + siteName + '"\n' +
+    'Outcome: "1"=ev kazanır, "X"=beraberlik, "2"=deplasman, "1X"/"X2"/"12"=çifte şans\n' +
+    'SADECE JSON döndür:\n' +
+    '{"matches":[{"name":"Takım A - Takım B","league":"lig","date":"tarih","odds":[{"site":"' + siteName + '","outcome":"1","odd":2.15}]}]}';
+
+  return fetch('https://api.x.ai/v1/chat/completions', {
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
+    body:JSON.stringify({
+      model:'grok-2-vision-latest', max_tokens:3000, temperature:0,
+      messages:[{role:'user',content:[
+        {type:'image_url',image_url:{url:'data:'+img.mt+';base64,'+img.b64}},
+        {type:'text',text:prompt}
+      ]}]
+    })
+  }).then(function(r){
+    if (!r.ok) return r.json().then(function(e){throw new Error((e.error&&e.error.message)||'HTTP '+r.status);});
+    return r.json();
+  }).then(function(d){
+    if (d.error) throw new Error(d.error.message);
+    var text=(d.choices&&d.choices[0]&&d.choices[0].message&&d.choices[0].message.content||'').trim();
+    var m=text.match(/\{[\s\S]*\}/);
+    if (!m) return [];
+    try{ return JSON.parse(m[0]).matches||[]; } catch(e){ return []; }
+  });
+}
+
+// ── ANALİZ ──
+function log(msg, cls) {
+  var b=document.getElementById('logBox');
+  var p=document.createElement('p');
+  p.className=cls||'';
+  p.textContent=msg;
+  b.appendChild(p);
+  b.scrollTop=b.scrollHeight;
+}
+
+function startAnalysis() {
+  var apiKey=document.getElementById('apiKey').value.trim();
+  if (!apiKey) return;
+
+  // Görev listesi
+  var tasks=[];
+  for (var i=0;i<8;i++) {
+    var sname=document.getElementById('n'+i).value.trim()||('Site '+(i+1));
+    for (var j=0;j<imgs[i].length;j++) tasks.push({img:imgs[i][j],site:sname});
+  }
+  if (!tasks.length) return;
+
+  // UI
+  document.getElementById('goBtn').disabled=true;
+  document.getElementById('goBtn').textContent='⏳ ANALİZ EDİLİYOR...';
+  document.getElementById('errBox').className='err';
+  document.getElementById('progBox').className='prog show';
+  document.getElementById('logBox').innerHTML='';
+  document.getElementById('resultArea').style.display='none';
+  document.getElementById('progFill').style.width='0';
+  matches=[]; surebets=[];
+
+  var raw=[];
+  var done=0;
+
+  function next() {
+    if (done>=tasks.length) { finish(); return; }
+    var t=tasks[done];
+    document.getElementById('progTitle').textContent='İşleniyor: '+t.site+' — '+t.img.name;
+    callGrok(apiKey, t.img, t.site).then(function(res){
+      raw=raw.concat(res);
+      done++;
+      var pct=Math.round(done/tasks.length*100);
+      document.getElementById('progFill').style.width=pct+'%';
+      document.getElementById('progTxt').textContent=done+' / '+tasks.length+'  ('+pct+'%)';
+      log('✓ '+t.site+': '+t.img.name+' → '+res.length+' maç','ok');
+      setTimeout(next,200);
+    }).catch(function(e){
+      done++;
+      var pct=Math.round(done/tasks.length*100);
+      document.getElementById('progFill').style.width=pct+'%';
+      document.getElementById('progTxt').textContent=done+' / '+tasks.length+'  ('+pct+'%)';
+      log('✗ '+t.site+': '+t.img.name+' → '+e.message,'er');
+      setTimeout(next,200);
+    });
+  }
+
+  function finish() {
+    document.getElementById('progTitle').textContent='✅ Tamamlandı — '+tasks.length+' görsel işlendi';
+    matches=mergeMatches(raw);
+    surebets=findArbitrage(matches);
+    renderResults();
+    renderOdds();
+    document.getElementById('resultArea').style.display='block';
+    document.getElementById('tab1').textContent='📊 SONUÇLAR ('+surebets.length+')';
+    document.getElementById('tab2').textContent='📋 ORANLAR ('+matches.length+' maç)';
+    document.getElementById('resultArea').scrollIntoView({behavior:'smooth'});
+    var total=imgs.reduce(function(a,b){return a+b.length;},0);
+    document.getElementById('goBtn').textContent='◆ TEKRAR ANALİZ ET ('+total+' görsel)';
+    document.getElementById('goBtn').disabled=false;
+  }
+
+  next();
+}
+
+// ── RENDER ──
+function renderResults() {
+  var el=document.getElementById('panel1');
+  var stake=parseFloat(document.getElementById('stake').value)||1000;
+  if (!surebets.length) {
+    el.innerHTML='<div class="empty"><div class="empty-i">🔍</div><div class="empty-t">'+(matches.length?'SUREBET BULUNAMADI':'HENÜZ ANALİZ YAPILMADI')+'</div>'+(matches.length?'<div style="font-size:11px;color:#4a5568;margin-top:6px">'+matches.length+' maç analiz edildi</div>':'')+'</div>';
+    return;
+  }
+  var html='<div class="stat-row">'+
+    '<div class="stat"><div class="stat-v" style="color:#00e676">'+surebets.length+'</div><div class="stat-l">Surebet</div></div>'+
+    '<div class="stat"><div class="stat-v" style="color:#29b6f6">'+matches.length+'</div><div class="stat-l">Toplam Maç</div></div>'+
+    '<div class="stat"><div class="stat-v" style="color:#ffd54f">%'+surebets[0].profit.toFixed(2)+'</div><div class="stat-l">En İyi Kâr</div></div>'+
+    '<div class="stat"><div class="stat-v" style="color:#ff7043">₺'+stake+'</div><div class="stat-l">Bahis</div></div>'+
+  '</div>';
+
+  for (var i=0;i<surebets.length;i++) {
+    var sb=surebets[i];
+    var ws=calcStakes(sb.group,stake);
+    var net=(stake*sb.profit/100).toFixed(2);
+    var rows=ws.map(function(w){
+      return '<tr><td><span class="t-site">'+w.site+'</span></td>'+
+        '<td><span class="t-out">'+(LABELS[w.outcome]||w.outcome)+'</span></td>'+
+        '<td><span class="t-odd">'+w.odd.toFixed(2)+'</span></td>'+
+        '<td><span class="t-stake">₺'+w.stake+'</span></td>'+
+        '<td><span class="t-ret">₺'+w.ret+'</span></td></tr>';
+    }).join('');
+    html+='<div class="sb">'+
+      '<div class="sb-head" onclick="var b=document.getElementById(\'b'+i+'\');var a=document.getElementById(\'a'+i+'\');b.classList.toggle(\'open\');a.textContent=b.classList.contains(\'open\')?\'▲\':\'▼\'">'+
+        '<div class="sb-num">'+(i+1)+'</div>'+
+        '<div class="sb-info">'+
+          '<div class="sb-match">'+sb.match+'</div>'+
+          '<div class="sb-meta">'+(sb.league?'<span style="color:#29b6f6">'+sb.league+'</span> · ':'')+
+          'Tip: <b style="color:#ffd54f">'+sb.type+'</b> · '+
+          sb.group.map(function(g){return '<b style="color:#fff">'+g.site+'</b>';}).join(' + ')+'</div>'+
+        '</div>'+
+        '<div class="sb-pct"><div class="sb-pct-n">%'+sb.profit.toFixed(2)+'</div><div class="sb-pct-l">KÂR</div></div>'+
+        '<span style="color:#4a5568;font-size:11px;margin-left:4px" id="a'+i+'">▼</span>'+
+      '</div>'+
+      '<div class="sb-body" id="b'+i+'">'+
+        '<table class="bt"><thead><tr><th>Site</th><th>Sonuç</th><th>Oran</th><th>Yatır</th><th>Kazanç</th></tr></thead>'+
+        '<tbody>'+rows+'</tbody></table>'+
+        '<div class="guarantee">'+
+          '<div><div class="g-lbl">Garantili Net Kâr</div><div class="g-sub">Her sonuçta kazanırsınız</div></div>'+
+          '<div style="text-align:right"><div class="g-amt">+₺'+net+'</div><div style="font-size:10px;color:#4a5568">%'+sb.profit.toFixed(3)+'</div></div>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+  }
+  el.innerHTML=html;
+}
+
+function renderOdds() {
+  var el=document.getElementById('panel2');
+  if (!matches.length) { el.innerHTML='<div class="empty"><div class="empty-i">📋</div><div class="empty-t">ORAN YOK</div></div>'; return; }
+  el.innerHTML=matches.map(function(m){
+    var chips=m.odds.map(function(o){
+      return '<div class="chip"><div class="chip-s">'+o.site+'</div>'+
+        '<div class="chip-r"><span class="chip-o">'+(LABELS[o.outcome]||o.outcome)+'</span>'+
+        '<span class="chip-v">'+parseFloat(o.odd).toFixed(2)+'</span></div></div>';
+    }).join('');
+    return '<div class="match-block">'+
+      '<div class="match-hd"><div>'+
+        '<div class="match-n">'+m.name+'</div>'+
+        ((m.league||m.date)?'<div class="match-s">'+(m.league||'')+' '+(m.date?'· '+m.date:'')+'</div>':'')+
+      '</div><span class="match-cnt">'+m.odds.length+' oran</span></div>'+
+      '<div class="chips">'+chips+'</div></div>';
+  }).join('');
+}
+
+function showTab(n) {
+  document.getElementById('tab1').className='tab-btn'+(n===1?' on':'');
+  document.getElementById('tab2').className='tab-btn'+(n===2?' on':'');
+  document.getElementById('panel1').style.display=n===1?'block':'none';
+  document.getElementById('panel2').style.display=n===2?'block':'none';
+}
+</script>
+</body>
+</html>
